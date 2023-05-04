@@ -6,12 +6,12 @@
 
  scorecolor=$04
 
+ COLUBK=$A9
+ COLUPF=$80
  COLUP0=$C4
  COLUP1=$C8
- COLUBK=$80
- COLUPF=$A9
  NUSIZ0=$35
- CTRLPF=$31
+ CTRLPF=$21
 
  const screenWidth = 159
  const screenHeight = 191
@@ -23,6 +23,8 @@
  const maxBallX = 160
  const minBallY = 40
  const maxBallY = 80
+ dim bugNum = 1
+ dim playingGame = 1
 
  player0x=90
  player0y=60
@@ -94,13 +96,21 @@ mainloop
   if joy0right && player0x < maxPlayer0x then gosub movePlayerRight
 
   if collision(ball, player0) then gosub hitBall
+  if collision(player1, player0) then gosub hitLitterbug
   if collision(missile0, player0) then gosub hitMissile0
   if collision(missile1, player0) then gosub hitMissile1
 
-  if ballx = 0 then gosub positionBall
-  if missile0x = 0 then gosub positionMissile0
-  if missile1x = 0 then gosub positionMissile1
-  if player1x = 0 then gosub positionLitterbug
+  if !ballx then gosub positionBall
+  if !missile0x then gosub positionMissile0
+  if !missile1x then gosub positionMissile1
+  if !player1x then gosub positionLitterbug
+
+  if switchreset then goto startGame
+  if joy0fire && !playingGame then goto startGame
+
+  if !pfscore1 && playingGame then gosub gameOver
+
+  if bugNum = 1 then bugNum = 2
 
   drawscreen
 
@@ -131,20 +141,27 @@ movePlayerRight
 
   return
 
+hitLitterbug
+  pfscore1 = pfscore1/4
+
+  gosub positionLitterbug
+
+  return
+
 hitBall
-  score = score + 10
+  if playingGame then score = score + 10
   gosub positionBall
 
   return
 
 hitMissile0
-  score = score + 10
+  if playingGame then score = score + 10
   gosub positionMissile0
 
   return
 
 hitMissile1
-  score = score + 10
+  if playingGame then score = score + 10
   gosub positionMissile1
 
   return
@@ -172,3 +189,24 @@ positionMissile1
   missile1y = (rand&31) + 40
 
   return
+
+gameOver
+  COLUBK=$45
+  playingGame = 0
+
+  return
+
+startGame
+  playingGame = 1
+
+  COLUBK=$80
+
+  pfscore1 = 21
+  pfscore2 = 255
+
+  gosub positionBall
+  gosub positionMissile0
+  gosub positionMissile1
+  gosub positionLitterbug
+
+  goto mainloop
