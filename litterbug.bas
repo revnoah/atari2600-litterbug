@@ -25,6 +25,7 @@
  const maxBallY = 80
  dim bugNum = 1
  dim playingGame = 1
+ dim currentTarget = 0
 
  player0x=90
  player0y=60
@@ -99,11 +100,15 @@ mainloop
   if collision(player1, player0) then gosub hitLitterbug
   if collision(missile0, player0) then gosub hitMissile0
   if collision(missile1, player0) then gosub hitMissile1
+  if collision(missile0, player1) then gosub hitLitterbugMissile0
+  if collision(missile1, player1) then gosub hitLitterbugMissile1
 
   if !ballx then gosub positionBall
   if !missile0x then gosub positionMissile0
   if !missile1x then gosub positionMissile1
   if !player1x then gosub positionLitterbug
+
+  if !pfscore1 && playingGame then gosub moveLitterbug
 
   if switchreset then goto startGame
   if joy0fire && !playingGame then goto startGame
@@ -141,6 +146,39 @@ movePlayerRight
 
   return
 
+moveLitterbug
+  rem if currentTarget = 0 then currentTarget = (rand&3)
+  rem if currentTarget = 1 then gosub moveLitterbugPlayer
+  rem if currentTarget = 2 then gosub moveLitterbugMissile0
+  rem if currentTarget = 3 then gosub moveLitterbugMissile1
+
+  if player0x < player1x then player1x = player1x - 1 else player1x = player1x + 1
+  if player0y < player1y then player1y = player1y - 1 else player1y = player1y + 1
+  player1x = player1x : player1y = player1y
+
+  return
+
+moveLitterbugPlayer
+  if player0x < player1x then player1x = player1x - 1 else player1x = player1x + 1
+  if player0y < player1y then player1y = player1y - 1 else player1y = player1y + 1
+  player1x = player1x : player1y = player1y
+
+  return
+
+moveLitterbugMissile0
+  if missile0x < player1x then player1x = player1x - 1 else player1x = player1x + 1
+  if missile0y < player1y then player1y = player1y - 1 else player1y = player1y + 1
+  player1x = player1x : player1y = player1y
+
+  return
+
+moveLitterbugMissile1
+  if missile1x < player1x then player1x = player1x - 1 else player1x = player1x + 1
+  if missile1y < player1y then player1y = player1y - 1 else player1y = player1y + 1
+  player1x = player1x : player1y = player1y
+
+  return
+
 hitLitterbug
   pfscore1 = pfscore1/4
 
@@ -162,6 +200,16 @@ hitMissile0
 
 hitMissile1
   if playingGame then score = score + 10
+  gosub positionMissile1
+
+  return
+
+hitLitterbugMissile0
+  gosub positionMissile0
+
+  return
+
+hitLitterbugMissile1
   gosub positionMissile1
 
   return
